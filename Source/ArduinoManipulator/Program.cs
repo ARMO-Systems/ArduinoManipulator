@@ -5,7 +5,7 @@ namespace ArduinoManipulator
 {
     internal static class Program
     {
-        private const string ArduinoIp = "192.168.20.177";
+        private const string ArduinoIp = "192.168.20.51";
         private const int ArduinoPort = 9600;
 
         private static int Main( string[] args )
