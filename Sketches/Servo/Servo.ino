@@ -20,6 +20,19 @@ void setup(){
 void loop(){
   EthernetClient client = server.available();
   if (client) {
-    myservo.write(client.read());
+    int readedByte1 = client.read();
+    int readedByte2 = client.read();
+    int readedByte3 = client.read();
+    int readedByte4 = client.read();
+    
+    int delayi = (readedByte4 << 24) + (readedByte3 << 16) + (readedByte2 << 8) + readedByte1;
+    
+    myservo.write(45);
+    delay(delayi);
+    myservo.write(95);
+    delay(200);
+    myservo.write(135);
+    delay(delayi);
+    myservo.write(95);
   }
 }

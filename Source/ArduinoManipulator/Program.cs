@@ -16,14 +16,9 @@ namespace ArduinoManipulator
                 client.Connect( ArduinoIp, ArduinoPort );
                 using ( var stream = client.GetStream() )
                 {
-                    var angle = byte.Parse( args[ 0 ] );
-                    var data = new[] { angle };
-                    stream.Write( data, 0, data.Length );
-
-                    const int readTimeout = 5000;
-                    stream.ReadTimeout = readTimeout;
-                    if ( stream.ReadByte() != angle )
-                        throw new Exception( "ArduinoException" );
+                    var rotateTime = int.Parse( args[ 0 ] );
+                    var sendingData = BitConverter.GetBytes( rotateTime );
+                    stream.Write( sendingData, 0, sendingData.Length );
                 }
             }
             catch ( ArgumentNullException exception )
