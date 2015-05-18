@@ -16,22 +16,22 @@ void setup() {
   Serial.begin( 9600 );
   Ethernet.begin(mac, ip, gateway, subnet);
   server.begin();
-  
+
   SetupPin(3);
   SetupPin(5);
-  
+
   SetupPin(6);
   SetupPin(9);
-  
+
   SetupPin(A0);
   SetupPin(A1);
-  
+
   SetupPin(A2);
   SetupPin(A3);
-  
+
   SetupPin(A4);
   SetupPin(A5);
-  
+
   resetState();
 }
 void SetupPin(byte pin)
@@ -41,7 +41,7 @@ void SetupPin(byte pin)
 }
 
 
-void writeCard(unsigned long sendValue, int WDO,int WD1) {
+void writeCard(unsigned long sendValue, int WDO, int WD1) {
   const byte sendDelay = 200;
   for (short x = MESSAGE_LEN - 1; x >= 0; x--) {
     if ( bitRead(sendValue, x) == 1 ) {
@@ -67,7 +67,7 @@ void AppendByteToCard(int index, byte value)
 {
   const byte byteSize = 8;
   for (  byte i = 0; i < byteSize; i++  )
-     bitWrite(cardValue, byteSize  * index + i, bitRead( value, i));
+    bitWrite(cardValue, byteSize  * index + i, bitRead( value, i));
 }
 
 void AppendCheckSum()
@@ -113,13 +113,13 @@ void loop() {
     byte readerNumber = client.read();
     Serial.println("Reader number:");
     Serial.println(readerNumber, DEC);
-    
+
     for (int i = 0; i < 3; i++)
     {
-      byte val=  client.read();
+      byte val =  client.read();
       Serial.println("Append value:");
       Serial.println(val, DEC);
-      AppendByteToCard(i,val );
+      AppendByteToCard(i, val );
     }
     // if (Serial.available() ) {
     //while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
@@ -128,14 +128,14 @@ void loop() {
     AppendCheckSum();
     Serial.println("CardNumber after checksum:");
     Serial.println(cardValue, DEC);
-    
-    switch(readerNumber)
+
+    switch (readerNumber)
     {
-      case 1:  writeCard(cardValue,3,5); break;
-      case 2:  writeCard(cardValue,6,9); break;
-      case 3:  writeCard(cardValue,A0,A1); break;
-      case 4:  writeCard(cardValue,A2,A3); break;
-      case 5:  writeCard(cardValue,A4,A5); break;
+      case 1:  writeCard(cardValue, 3, 5); break;
+      case 2:  writeCard(cardValue, 6, 9); break;
+      case 3:  writeCard(cardValue, A0, A1); break;
+      case 4:  writeCard(cardValue, A2, A3); break;
+      case 5:  writeCard(cardValue, A4, A5); break;
     }
     delay(200);
     resetState();
