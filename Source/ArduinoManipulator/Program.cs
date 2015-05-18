@@ -18,7 +18,7 @@ namespace ArduinoManipulator
                 using ( var stream = client.GetStream() )
                 {
                     var reader = int.Parse( args[ 0 ] );
-                    var cardNumber = int.Parse( args[ 1 ] );
+                    var cardNumber = uint.Parse( args[ 1 ] );
                     var sendingData = BitConverter.GetBytes( reader ).Take( 1 ).Concat( BitConverter.GetBytes( cardNumber ).Take( 3 ) ).ToArray();
                     stream.Write( sendingData, 0, sendingData.Length );
                 }
