@@ -10,35 +10,48 @@ IPAddress subnet(255, 255, 255, 0);
 const int serverPort = 9600;
 EthernetServer server = EthernetServer(serverPort);
 
-int toVertX_D0 = 5; // output DATA0 (Green) to Controller
-int toVertX_D1 = 6; // output DATA1 (White) to Controller
-
 unsigned long cardValue = 0;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin( 9600 );
   Ethernet.begin(mac, ip, gateway, subnet);
   server.begin();
-  pinMode(toVertX_D0, OUTPUT);
-  digitalWrite(toVertX_D0, HIGH);
-
-  pinMode(toVertX_D1, OUTPUT);
-  digitalWrite(toVertX_D1, HIGH);
-
+  
+  SetupPin(3);
+  SetupPin(5);
+  
+  SetupPin(6);
+  SetupPin(9);
+  
+  SetupPin(A0);
+  SetupPin(A1);
+  
+  SetupPin(A2);
+  SetupPin(A3);
+  
+  SetupPin(A4);
+  SetupPin(A5);
+  
   resetState();
 }
+void SetupPin(byte pin)
+{
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, HIGH);
+}
 
-void writeCard(unsigned long sendValue) {
+
+void writeCard(unsigned long sendValue, int WDO,int WD1) {
   const byte sendDelay = 200;
   for (short x = MESSAGE_LEN - 1; x >= 0; x--) {
     if ( bitRead(sendValue, x) == 1 ) {
-      digitalWrite(toVertX_D1, LOW);
+      digitalWrite(WD1, LOW);
       delayMicroseconds(sendDelay);
-      digitalWrite(toVertX_D1, HIGH);
+      digitalWrite(WD1, HIGH);
     } else {
-      digitalWrite(toVertX_D0, LOW);
+      digitalWrite(WDO, LOW);
       delayMicroseconds(sendDelay);
-      digitalWrite(toVertX_D0, HIGH);
+      digitalWrite(WDO, HIGH);
     }
     Serial.print(bitRead(sendValue, x));
     delayMicroseconds(2000);
@@ -115,7 +128,15 @@ void loop() {
     AppendCheckSum();
     Serial.println("CardNumber after checksum:");
     Serial.println(cardValue, DEC);
-    writeCard(cardValue);
+    
+    switch(readerNumber)
+    {
+      case 1:  writeCard(cardValue,3,5); break;
+      case 2:  writeCard(cardValue,6,9); break;
+      case 3:  writeCard(cardValue,A0,A1); break;
+      case 4:  writeCard(cardValue,A2,A3); break;
+      case 5:  writeCard(cardValue,A4,A5); break;
+    }
     delay(200);
     resetState();
   }
