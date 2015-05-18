@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace ArduinoManipulator
@@ -16,8 +17,9 @@ namespace ArduinoManipulator
                 client.Connect( ArduinoIp, ArduinoPort );
                 using ( var stream = client.GetStream() )
                 {
-                    var rotateTime = int.Parse( args[ 0 ] );
-                    var sendingData = BitConverter.GetBytes( rotateTime );
+                    var reader = int.Parse( args[ 0 ] );
+                    var cardNumber = int.Parse( args[ 1 ] );
+                    var sendingData = BitConverter.GetBytes( reader ).Take( 1 ).Concat( BitConverter.GetBytes( cardNumber ).Take( 3 ) ).ToArray();
                     stream.Write( sendingData, 0, sendingData.Length );
                 }
             }
