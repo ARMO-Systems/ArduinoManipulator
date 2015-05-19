@@ -121,8 +121,11 @@ void loop() {
       Serial.println(val, DEC);
       AppendByteToCard(i, val );
     }
-    // if (Serial.available() ) {
-    //while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
+//   if (Serial.available() ) {
+//     byte readerNumber = Serial.read()- '0';
+//     Serial.println("Reader number:");
+//    Serial.println(readerNumber, DEC);
+//    while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
     Serial.println("CardNumber:");
     Serial.println(cardValue, DEC);
     AppendCheckSum();
