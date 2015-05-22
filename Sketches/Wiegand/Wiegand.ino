@@ -9,6 +9,7 @@ IPAddress ip(192, 168, 20, 177);
 IPAddress gateway(192, 168, 20, 1);
 IPAddress subnet(255, 255, 255, 0);
 const int serverPort = 9600;
+const int ledPin=13;
 EthernetServer server = EthernetServer(serverPort);
 
 unsigned long cardValue = 0;
@@ -35,7 +36,7 @@ void setup() {
   SetupPin(A4);
   SetupPin(A5);
 
-  pinMode(13, OUTPUT);
+  pinMode(ledPin, OUTPUT);
   resetState();
   wdt_enable (WDTO_8S);
 }
@@ -45,26 +46,21 @@ void SetupPin(byte pin)
   digitalWrite(pin, HIGH);
 }
 
-void test()
-{
-  digitalWrite(13, HIGH);
-}
-
 void writeCard(unsigned long sendValue, int WDO, int WD1) {
   const byte sendDelay = 200;
   for (short x = MESSAGE_LEN - 1; x >= 0; x--) {
     if ( bitRead(sendValue, x) == 1 ) {
       digitalWrite(WD1, LOW);
-      digitalWrite(13, HIGH);
+      digitalWrite(ledPin, HIGH);
       delayMicroseconds(sendDelay);
       digitalWrite(WD1, HIGH);
-      digitalWrite(13, LOW);
+      digitalWrite(ledPin, LOW);
     } else {
       digitalWrite(WDO, LOW);
-      digitalWrite(13, HIGH);
+      digitalWrite(ledPin, HIGH);
       delayMicroseconds(sendDelay);
       digitalWrite(WDO, HIGH);
-      digitalWrite(13, LOW);
+      digitalWrite(ledPin, LOW);
     }
     Serial.print(bitRead(sendValue, x));
     delayMicroseconds(2000);
