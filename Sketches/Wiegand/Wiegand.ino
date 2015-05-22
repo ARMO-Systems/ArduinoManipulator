@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Ethernet.h>
+#include <avr/wdt.h>
 #define MESSAGE_LEN 26
 #define CARDNUM_LEN 24
 
@@ -13,7 +14,9 @@ EthernetServer server = EthernetServer(serverPort);
 unsigned long cardValue = 0;
 
 void setup() {
+  wdt_disable();
   Serial.begin( 9600 );
+  delay(2000);
   Ethernet.begin(mac, ip, gateway, subnet);
   server.begin();
 
@@ -32,7 +35,9 @@ void setup() {
   SetupPin(A4);
   SetupPin(A5);
 
+  pinMode(13, OUTPUT);
   resetState();
+  wdt_enable (WDTO_8S);
 }
 void SetupPin(byte pin)
 {
@@ -40,18 +45,26 @@ void SetupPin(byte pin)
   digitalWrite(pin, HIGH);
 }
 
+void test()
+{
+  digitalWrite(13, HIGH);
+}
 
 void writeCard(unsigned long sendValue, int WDO, int WD1) {
   const byte sendDelay = 200;
   for (short x = MESSAGE_LEN - 1; x >= 0; x--) {
     if ( bitRead(sendValue, x) == 1 ) {
       digitalWrite(WD1, LOW);
+      digitalWrite(13, HIGH);
       delayMicroseconds(sendDelay);
       digitalWrite(WD1, HIGH);
+      digitalWrite(13, LOW);
     } else {
       digitalWrite(WDO, LOW);
+      digitalWrite(13, HIGH);
       delayMicroseconds(sendDelay);
       digitalWrite(WDO, HIGH);
+      digitalWrite(13, LOW);
     }
     Serial.print(bitRead(sendValue, x));
     delayMicroseconds(2000);
@@ -143,5 +156,7 @@ void loop() {
     delay(200);
     resetState();
   }
+  client.stop();
+  wdt_reset();
 }
 
