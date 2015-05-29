@@ -6,7 +6,7 @@ namespace ArduinoManipulator
 {
     internal static class Program
     {
-        private const string ArduinoIp = "192.168.20.195";
+        private const string ArduinoIp = "192.168.20.177";
         private const int ArduinoPort = 9600;
 
         private static int Main( string[] args )
@@ -18,9 +18,8 @@ namespace ArduinoManipulator
                 using ( var stream = client.GetStream() )
                 {
                     var reader = int.Parse( args[ 0 ] );
-                    var typeAccess = int.Parse( args[ 1 ] );
-                    var cardNumber = int.Parse( args[ 2 ] );
-                    var sendingData = BitConverter.GetBytes( reader ).Take( 1 ).Concat( BitConverter.GetBytes( typeAccess ).Take( 1 ) ).Concat( BitConverter.GetBytes( cardNumber ).Take( 4 ) ).ToArray();
+                    var cardNumber = uint.Parse( args[ 1 ] );
+                    var sendingData = BitConverter.GetBytes( reader ).Take( 1 ).Concat( BitConverter.GetBytes( cardNumber ).Take( 3 ) ).ToArray();
                     stream.Write( sendingData, 0, sendingData.Length );
                 }
             }
