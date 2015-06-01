@@ -1,10 +1,8 @@
 #include <SPI.h>
 #include <EthernetV2_0.h>
 #include <avr/wdt.h>
-#define MESSAGE_LEN_CARD_W26 26
-#define CARDNUM_LEN_W26 24
 
-#define MESSAGE_LEN_CARD_W34 34
+#define CARDNUM_LEN_W26 24
 #define CARDNUM_LEN_W34 32
 
 #define MESSAGE_LEN_PIN 8
@@ -130,11 +128,7 @@ unsigned long AppendCheckSum(unsigned long data, int length)
 
 byte AppendInvertBits(byte data, int length)
 {
-	int middlePoint = length / 2;
-	for (int i = 0; i < middlePoint; i++)
-	{
-		bitWrite(data, middlePoint + i, 1 ^ bitRead(data, i));
-	}
+        data += (byte)(~data << length / 2);
 	Serial.println("Revert:");
 	Serial.println(data, BIN);
 	return data;
@@ -172,6 +166,18 @@ void SendData(byte readerNumber, unsigned long sendValue, byte messageLen)
 	case 3:  writeData(sendValue, messageLen, A2, A3); break;
 	case 4:  writeData(sendValue, messageLen, A4, A5); break;
 	}
+}
+
+void SendCardWithTwoParityBits( byte readerNumber, unsigned long cardValue, int cardNumberLength )
+{
+        Serial.println("CardNumber:");
+        Serial.println(cardValue, DEC);
+        
+        cardValue = AppendCheckSum(cardValue, cardNumberLength);
+        Serial.println("CardNumber after checksum:");
+        Serial.println(cardValue, DEC);
+        
+        SendData(readerNumber, cardValue, cardNumberLength + 2); 
 }
 
 void loop() {
@@ -216,38 +222,20 @@ void loop() {
         				byte pinDigit = (byte)(TakeDigit(pinValue, i));
         				Serial.println("PinDigit:");
         				Serial.println(pinDigit, DEC);
-        				pinDigit = AppendInvertBits(pinDigit, MESSAGE_LEN_PIN);
-        				SendData(readerNumber, pinDigit, MESSAGE_LEN_PIN);
+        				SendData(readerNumber, AppendInvertBits(pinDigit, MESSAGE_LEN_PIN), MESSAGE_LEN_PIN);
         				delay(50);
         			}
-        			byte enter = AppendInvertBits(ENTER_PIN, MESSAGE_LEN_PIN);
-        			SendData(readerNumber, enter, MESSAGE_LEN_PIN);
+        			SendData(readerNumber, AppendInvertBits(ENTER_PIN, MESSAGE_LEN_PIN), MESSAGE_LEN_PIN);
         			break;
         		}
         		case Card26:
         		{
-        			unsigned long cardValue = data;
-        			Serial.println("CardNumber:");
-        			Serial.println(cardValue, DEC);
-        
-        			cardValue = AppendCheckSum(cardValue, CARDNUM_LEN_W26);
-        			Serial.println("CardNumber after checksum:");
-        			Serial.println(cardValue, DEC);
-        
-        			SendData(readerNumber, cardValue, MESSAGE_LEN_CARD_W26);
+                                SendCardWithTwoParityBits( readerNumber, data, CARDNUM_LEN_W26 );
         			break;
         		}        
         		case Card32:
         		{
-        			unsigned long cardValue = data;
-        			Serial.println("CardNumber:");
-        			Serial.println(cardValue, DEC);
-        
-        			cardValue = AppendCheckSum(cardValue, CARDNUM_LEN_W34);
-        			Serial.println("CardNumber after checksum:");
-        			Serial.println(cardValue, DEC);
-        
-        			SendData(readerNumber, cardValue, MESSAGE_LEN_CARD_W34);
+        			SendCardWithTwoParityBits( readerNumber, data, CARDNUM_LEN_W34 );
         			break;
         		}
                 }
