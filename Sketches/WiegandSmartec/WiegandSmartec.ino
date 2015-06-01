@@ -20,8 +20,7 @@ const int serverPort = 9600;
 const int ledPin = 13;
 EthernetServer server = EthernetServer(serverPort);
 
-//unsigned long cardValue = 0;
-//iny pinValue = 0;
+const byte sendDelay = 200;
 
 enum AccessType {
 	Pin, Card26, Card32
@@ -55,12 +54,8 @@ void setup() {
 	while (!Serial) {
 		; // wait for serial port to connect. Needed for Leonardo only
 	}
-
-	Serial.println(Ethernet.localIP());
-	Serial.print("Chat server address:");
-
-	resetState();
-	Serial.print("Chat server done");
+        Serial.print("Chat server address:");
+	Serial.println(Ethernet.localIP());	
 }
 
 void SetupPin(byte pin)
@@ -69,8 +64,8 @@ void SetupPin(byte pin)
 	digitalWrite(pin, HIGH);
 }
 
-void writeData(unsigned long sendValue, byte messageLen, int WDO, int WD1) {
-	const byte sendDelay = 200;
+void writeData(unsigned long sendValue, byte messageLen, int WDO, int WD1) 
+{	
 	for (short x = messageLen - 1; x >= 0; x--) {
 		if (bitRead(sendValue, x) == 1) {
 			digitalWrite(WD1, LOW);
@@ -92,11 +87,6 @@ void writeData(unsigned long sendValue, byte messageLen, int WDO, int WD1) {
 	Serial.println();
 }
 
-void resetState() {
-
-}
-
-
 unsigned long AppendByte(unsigned long data, int index, byte value)
 {
 	const byte byteSize = 8;
@@ -105,10 +95,8 @@ unsigned long AppendByte(unsigned long data, int index, byte value)
 	return data;
 }
 
-
 unsigned long AppendCheckSum(unsigned long data, int length)
 {
-
 	byte summ = 0;
 	int middlePoint = length / 2;
 
@@ -210,7 +198,6 @@ void loop() {
 			data = AppendByte(data, i, val);
 		}
 
-
                 switch ( accessType )
                 {
         		case Pin:
@@ -264,9 +251,8 @@ void loop() {
         			break;
         		}
                 }
-		resetState();
-	}
-	client.stop();
+                client.stop();
+	}	
 	delay(200);
 }
 
