@@ -1,11 +1,15 @@
 #include <SPI.h>
 #include <EthernetV2_0.h>
 #include <avr/wdt.h>
-#define MESSAGE_LEN_CARD 26
-#define CARDNUM_LEN 24
+#define MESSAGE_LEN_CARD_W26 26
+#define CARDNUM_LEN_W26 24
+
+#define MESSAGE_LEN_CARD_W34 34
+#define CARDNUM_LEN_W34 32
+
 #define MESSAGE_LEN_PIN 8
 #define ENTER_PIN 11
-#define W5200_CS  10
+
 #define SDCARD_CS 4
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xAB, 0xFE, 0xED };
@@ -20,7 +24,7 @@ EthernetServer server = EthernetServer(serverPort);
 //iny pinValue = 0;
 
 enum AccessType {
-	Card, Pin
+	Pin, Card26, Card32
 };
 void setup() {
 
@@ -63,29 +67,6 @@ void SetupPin(byte pin)
 {
 	pinMode(pin, OUTPUT);
 	digitalWrite(pin, HIGH);
-}
-
-void writeCard(unsigned long sendValue, int WDO, int WD1) {
-	const byte sendDelay = 200;
-	for (short x = MESSAGE_LEN_CARD - 1; x >= 0; x--) {
-		if (bitRead(sendValue, x) == 1) {
-			digitalWrite(WD1, LOW);
-			digitalWrite(ledPin, HIGH);
-			delayMicroseconds(sendDelay);
-			digitalWrite(WD1, HIGH);
-			digitalWrite(ledPin, LOW);
-		}
-		else {
-			digitalWrite(WDO, LOW);
-			digitalWrite(ledPin, HIGH);
-			delayMicroseconds(sendDelay);
-			digitalWrite(WDO, HIGH);
-			digitalWrite(ledPin, LOW);
-		}
-		Serial.print(bitRead(sendValue, x));
-		delayMicroseconds(2000);
-	}
-	Serial.println();
 }
 
 void writeData(unsigned long sendValue, byte messageLen, int WDO, int WD1) {
@@ -229,42 +210,60 @@ void loop() {
 			data = AppendByte(data, i, val);
 		}
 
-		if (accessType == Card)
-		{
-			unsigned long cardValue = data;
-			Serial.println("CardNumber:");
-			Serial.println(cardValue, DEC);
 
-			cardValue = AppendCheckSum(cardValue, CARDNUM_LEN);
-			Serial.println("CardNumber after checksum:");
-			Serial.println(cardValue, DEC);
-
-			SendData(readerNumber, cardValue, MESSAGE_LEN_CARD);
-		}
-
-		if (accessType == Pin)
-		{
-			unsigned long pinValue = data;
-
-			Serial.println("Pin:");
-			Serial.println(pinValue, DEC);
-
-			int pinCount = GetCountDigits(pinValue);
-			Serial.println("Count:");
-			Serial.println(pinCount, DEC);
-
-			for (int i = pinCount - 1; i >= 0; i--)
-			{
-				byte pinDigit = (byte)(TakeDigit(pinValue, i));
-				Serial.println("PinDigit:");
-				Serial.println(pinDigit, DEC);
-				pinDigit = AppendInvertBits(pinDigit, MESSAGE_LEN_PIN);
-				SendData(readerNumber, pinDigit, MESSAGE_LEN_PIN);
-				delay(50);
-			}
-			byte enter = AppendInvertBits(ENTER_PIN, MESSAGE_LEN_PIN);
-			SendData(readerNumber, enter, MESSAGE_LEN_PIN);
-		}
+                switch ( accessType )
+                {
+        		case Pin:
+        		{
+        			unsigned long pinValue = data;
+        
+        			Serial.println("Pin:");
+        			Serial.println(pinValue, DEC);
+        
+        			int pinCount = GetCountDigits(pinValue);
+        			Serial.println("Count:");
+        			Serial.println(pinCount, DEC);
+        
+        			for (int i = pinCount - 1; i >= 0; i--)
+        			{
+        				byte pinDigit = (byte)(TakeDigit(pinValue, i));
+        				Serial.println("PinDigit:");
+        				Serial.println(pinDigit, DEC);
+        				pinDigit = AppendInvertBits(pinDigit, MESSAGE_LEN_PIN);
+        				SendData(readerNumber, pinDigit, MESSAGE_LEN_PIN);
+        				delay(50);
+        			}
+        			byte enter = AppendInvertBits(ENTER_PIN, MESSAGE_LEN_PIN);
+        			SendData(readerNumber, enter, MESSAGE_LEN_PIN);
+        			break;
+        		}
+        		case Card26:
+        		{
+        			unsigned long cardValue = data;
+        			Serial.println("CardNumber:");
+        			Serial.println(cardValue, DEC);
+        
+        			cardValue = AppendCheckSum(cardValue, CARDNUM_LEN_W26);
+        			Serial.println("CardNumber after checksum:");
+        			Serial.println(cardValue, DEC);
+        
+        			SendData(readerNumber, cardValue, MESSAGE_LEN_CARD_W26);
+        			break;
+        		}        
+        		case Card32:
+        		{
+        			unsigned long cardValue = data;
+        			Serial.println("CardNumber:");
+        			Serial.println(cardValue, DEC);
+        
+        			cardValue = AppendCheckSum(cardValue, CARDNUM_LEN_W34);
+        			Serial.println("CardNumber after checksum:");
+        			Serial.println(cardValue, DEC);
+        
+        			SendData(readerNumber, cardValue, MESSAGE_LEN_CARD_W34);
+        			break;
+        		}
+                }
 		resetState();
 	}
 	client.stop();
