@@ -1,25 +1,27 @@
 #include <SPI.h>
-#include <Ethernet.h>
+#include <EthernetV2_0.h>
 #include <avr/wdt.h>
-#define MESSAGE_LEN 26
-#define CARDNUM_LEN 24
+#define CheckSumLength 2
+
+
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 20, 177);
 IPAddress gateway(192, 168, 20, 1);
 IPAddress subnet(255, 255, 255, 0);
 const int serverPort = 9600;
-const int ledPin=13;
+const int ledPin = 13;
 EthernetServer server = EthernetServer(serverPort);
 
 unsigned long cardValue = 0;
+byte messageLength = 0;
 
 void setup() {
+
   wdt_disable();
+
   Serial.begin( 9600 );
-  delay(2000);
-  Ethernet.begin(mac, ip, gateway, subnet);
-  server.begin();
+
 
   SetupPin(3);
   SetupPin(5);
@@ -36,7 +38,12 @@ void setup() {
   SetupPin(A4);
   SetupPin(A5);
 
-  pinMode(ledPin, OUTPUT);
+  Ethernet.begin(mac, ip, gateway, subnet);
+  server.begin();
+  delay(2000);
+  Serial.print( "Server address:" );
+  Serial.println( Ethernet.localIP() );
+
   resetState();
   wdt_enable (WDTO_8S);
 }
@@ -48,7 +55,7 @@ void SetupPin(byte pin)
 
 void writeCard(unsigned long sendValue, int WDO, int WD1) {
   const byte sendDelay = 200;
-  for (short x = MESSAGE_LEN - 1; x >= 0; x--) {
+  for (short x = messageLength - 1; x >= 0; x--) {
     if ( bitRead(sendValue, x) == 1 ) {
       digitalWrite(WD1, LOW);
       digitalWrite(ledPin, HIGH);
@@ -69,32 +76,26 @@ void writeCard(unsigned long sendValue, int WDO, int WD1) {
 }
 void resetState() {
   cardValue = 0;
-}
-
-
-void AppendByteToCard(int index, byte value)
-{
-  const byte byteSize = 8;
-  for (  byte i = 0; i < byteSize; i++  )
-    bitWrite(cardValue, byteSize  * index + i, bitRead( value, i));
+  messageLength = 0;
 }
 
 void AppendCheckSum()
 {
 
   byte summ = 0;
-  byte middlePoint = CARDNUM_LEN / 2;
+  byte cardNumLength = messageLength - CheckSumLength;
+  byte middlePoint =  cardNumLength / 2;
 
-  for (  short i = CARDNUM_LEN - 1; i >= middlePoint; i--)
+  for (  short i = cardNumLength - 1; i >= middlePoint; i--)
   {
     Serial.print( bitRead(cardValue, i), DEC);
     summ += bitRead( cardValue, i );
   }
-
+  Serial.println();
   if (summ % 2 == 0)
-    bitClear( cardValue, CARDNUM_LEN);
+    bitClear( cardValue, cardNumLength);
   else
-    bitSet(cardValue, CARDNUM_LEN);
+    bitSet(cardValue, cardNumLength);
   Serial.println( summ, DEC );
 
   summ = 0;
@@ -104,6 +105,7 @@ void AppendCheckSum()
     Serial.print(bitRead( cardValue, i), DEC);
     summ += bitRead( cardValue, i );
   }
+  Serial.println();
   cardValue = cardValue << 1;
   if (summ % 2 == 0)
     bitSet( cardValue, 0);
@@ -119,24 +121,31 @@ void loop() {
   delay(200);
 
   if (client) {
+
     byte readerNumber = client.read();
     Serial.println("Reader number:");
     Serial.println(readerNumber, DEC);
 
-    for (int i = 0; i < 3; i++)
-    {
-      byte val =  client.read();
-      Serial.println("Append value:");
-      Serial.println(val, DEC);
-      AppendByteToCard(i, val );
+    messageLength = client.read();
+    Serial.println("Message length:");
+    Serial.println( messageLength, DEC );
+
+
+    while (client.connected()) {
+      if (client.available()) {
+        cardValue = cardValue * 10 + (client.read() - '0');
+      }
     }
-//   if (Serial.available() ) {
-//     byte readerNumber = Serial.read()- '0';
-//     Serial.println("Reader number:");
-//    Serial.println(readerNumber, DEC);
-//    while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
+//       if (Serial.available() ) {
+//         byte readerNumber = Serial.read()- '0';
+//           messageLength = Serial.read()-'0';
+//         Serial.println("Reader number:");
+//        Serial.println(readerNumber, DEC);
+//        while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
     Serial.println("CardNumber:");
     Serial.println(cardValue, DEC);
+    Serial.println("Message length:");
+    Serial.println( messageLength, DEC );
     AppendCheckSum();
     Serial.println("CardNumber after checksum:");
     Serial.println(cardValue, DEC);
@@ -152,6 +161,7 @@ void loop() {
     delay(200);
     resetState();
   }
+
   client.stop();
   wdt_reset();
 }
