@@ -39,7 +39,6 @@ namespace ArduinoManipulator
                     var parameters = new[] { options.ReaderNumber.ToString(), bitString }.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( item ) ) ).ToArray();
                     stream.Write( parameters, 0, parameters.Length );
                 }
-                client.Close();
             }
             catch ( Exception exception )
             {
