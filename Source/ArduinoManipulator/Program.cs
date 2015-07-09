@@ -1,54 +1,56 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using ArduinoManipulator.Common;
+using MoreLinq;
 
 namespace ArduinoManipulator
 {
     internal static class Program
     {
-        private const string ArduinoIp = "192.168.20.177";
+        private const string ArduinoIp = "192.168.20.195";
         private const int ArduinoPort = 9600;
+        private const int CheckSumLength = 2;
 
-        private static int Main( string[] args )
+        private static int Main()
         {
+            var options = new Options();
+            if ( options.CardNumber == 0 )
+                return -1;
+            if ( options.ReaderNumber == 0 )
+                return -2;
+            if ( options.WiegandBitSize == 0 || sizeof ( ulong ) * 8 + CheckSumLength < options.WiegandBitSize )
+                return -3;
+
+            var bitString = options.CardNumber.ToBinaryString( options.CheckSum ? options.WiegandBitSize - CheckSumLength : options.WiegandBitSize );
+            if ( options.CheckSum )
+            {
+                var middlePoint = bitString.Length / 2;
+                bitString = string.Format( "{0}{1}{2}", bitString.Take( middlePoint ).SumAsInt() % 2, bitString, bitString.TakeLast( middlePoint ).SumAsInt() % 2 == 1 ? 0 : 1 );
+            }
+
             var client = new TcpClient();
             try
             {
                 client.Connect( ArduinoIp, ArduinoPort );
                 using ( var stream = client.GetStream() )
                 {
-                    var parameters = args.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( string.Format( "{0}\n", item ) ) ) ).ToArray();
+                    var parameters = new[] { options.ReaderNumber.ToString(), bitString }.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( item ) ) ).ToArray();
                     stream.Write( parameters, 0, parameters.Length );
                 }
                 client.Close();
             }
-            catch ( ArgumentNullException exception )
-            {
-                Console.WriteLine( "ArgumentNullException: {0}", exception );
-                return -1;
-            }
-            catch ( SocketException exception )
-            {
-                Console.WriteLine( "SocketException: {0}", exception );
-                return -2;
-            }
             catch ( Exception exception )
             {
                 Console.WriteLine( "Exception: {0}", exception );
-                return -3;
+                return -4;
             }
             finally
             {
                 client.Close();
             }
             return 0;
-        }
-
-        private static IEnumerable< byte > TakeFirstByte( int value )
-        {
-            return BitConverter.GetBytes( value ).Take( 1 );
         }
     }
 }
