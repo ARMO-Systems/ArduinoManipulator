@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 
 namespace ArduinoManipulator
 {
@@ -17,11 +19,10 @@ namespace ArduinoManipulator
                 client.Connect( ArduinoIp, ArduinoPort );
                 using ( var stream = client.GetStream() )
                 {
-                    var reader = int.Parse( args[ 0 ] );
-                    var cardNumber = uint.Parse( args[ 1 ] );
-                    var sendingData = BitConverter.GetBytes( reader ).Take( 1 ).Concat( BitConverter.GetBytes( cardNumber ).Take( 3 ) ).ToArray();
-                    stream.Write( sendingData, 0, sendingData.Length );
+                    var parameters = args.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( string.Format( "{0}\n", item ) ) ) ).ToArray();
+                    stream.Write( parameters, 0, parameters.Length );
                 }
+                client.Close();
             }
             catch ( ArgumentNullException exception )
             {
@@ -43,6 +44,11 @@ namespace ArduinoManipulator
                 client.Close();
             }
             return 0;
+        }
+
+        private static IEnumerable< byte > TakeFirstByte( int value )
+        {
+            return BitConverter.GetBytes( value ).Take( 1 );
         }
     }
 }
