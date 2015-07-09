@@ -114,6 +114,20 @@ void AppendCheckSum()
   Serial.println( summ, DEC);
 }
 
+unsigned long ReadValue(EthernetClient client)
+{
+  unsigned long value = 0;
+  while (client.connected()) {
+    if (client.available()) {
+      char symbol = client.read();
+      if (symbol != '\n')
+        value = value * 10 + ( symbol - '0');
+      else
+        return value;
+    }
+  }
+  return value;
+}
 
 void loop() {
 
@@ -122,26 +136,21 @@ void loop() {
 
   if (client) {
 
-    byte readerNumber = client.read();
-    Serial.println("Reader number:");
-    Serial.println(readerNumber, DEC);
+    byte readerNumber = ReadValue( client );
+    Serial.println( "Reader number:" );
+    Serial.println( readerNumber, DEC );
 
-    messageLength = client.read();
-    Serial.println("Message length:");
+    messageLength =  ReadValue( client );
+    Serial.println( "Message length:" );
     Serial.println( messageLength, DEC );
 
-
-    while (client.connected()) {
-      if (client.available()) {
-        cardValue = cardValue * 10 + (client.read() - '0');
-      }
-    }
-//       if (Serial.available() ) {
-//         byte readerNumber = Serial.read()- '0';
-//           messageLength = Serial.read()-'0';
-//         Serial.println("Reader number:");
-//        Serial.println(readerNumber, DEC);
-//        while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
+    cardValue = ReadValue( client );
+    //       if (Serial.available() ) {
+    //         byte readerNumber = Serial.read()- '0';
+    //           messageLength = Serial.read()-'0';
+    //         Serial.println("Reader number:");
+    //        Serial.println(readerNumber, DEC);
+    //        while (Serial.available()) cardValue = cardValue * 10 + (Serial.read() - '0');
     Serial.println("CardNumber:");
     Serial.println(cardValue, DEC);
     Serial.println("Message length:");
