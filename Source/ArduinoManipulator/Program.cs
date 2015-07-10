@@ -9,7 +9,6 @@ namespace ArduinoManipulator
 {
     internal static class Program
     {
-        private const string ArduinoIp = "192.168.20.195";
         private const int ArduinoPort = 9600;
         private const int CheckSumLength = 2;
 
@@ -22,6 +21,8 @@ namespace ArduinoManipulator
                 return -2;
             if ( options.WiegandBitSize == 0 || sizeof ( ulong ) * 8 + CheckSumLength < options.WiegandBitSize )
                 return -3;
+            if ( string.IsNullOrEmpty( options.IP ) )
+                return -4;
 
             var bitString = options.CardNumber.ToBinaryString( options.CheckSum ? options.WiegandBitSize - CheckSumLength : options.WiegandBitSize );
             if ( options.CheckSum )
@@ -33,7 +34,7 @@ namespace ArduinoManipulator
             var client = new TcpClient();
             try
             {
-                client.Connect( ArduinoIp, ArduinoPort );
+                client.Connect( options.IP, ArduinoPort );
                 using ( var stream = client.GetStream() )
                 {
                     var parameters = new[] { options.ReaderNumber.ToString(), bitString }.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( item ) ) ).ToArray();
@@ -43,7 +44,7 @@ namespace ArduinoManipulator
             catch ( Exception exception )
             {
                 Console.WriteLine( "Exception: {0}", exception );
-                return -4;
+                return -5;
             }
             finally
             {

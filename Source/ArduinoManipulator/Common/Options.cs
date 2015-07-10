@@ -11,6 +11,9 @@ namespace ArduinoManipulator.Common
             Parse();
         }
 
+        [Option( 'i', "ip" )]
+        public string IP { set; get; }
+
         [Option( 'c', "checkSum" )]
         public bool CheckSum { set; get; }
 
