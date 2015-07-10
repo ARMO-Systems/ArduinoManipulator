@@ -1,12 +1,18 @@
 #include <SPI.h>
-#include <EthernetV2_0.h>
 #include <avr/wdt.h>
 
-#define SDCARD_CS 4
 
+//#include <EthernetV2_0.h>
+//#define UseEthernetV2
+#include <Ethernet.h>
 
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xAB, 0xFE, 0xED };
-IPAddress ip(192, 168, 20, 195);
+#if  defined(UseEthernetV2)
+  #define SDCARD_CS 4
+#endif
+
+  byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+  IPAddress ip(192, 168, 20, 177);
+
 IPAddress gateway(192, 168, 20, 1);
 IPAddress subnet(255, 255, 255, 0);
 const int serverPort = 9600;
@@ -17,7 +23,9 @@ EthernetServer server = EthernetServer(serverPort);
 void setup() {
 
   wdt_disable();
+#if defined(UseEthernetV2)
   SetupPin(SDCARD_CS);
+#endif
 
   SetupPin(3);
   SetupPin(5);
