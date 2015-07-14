@@ -34,18 +34,21 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ArmoLib">
-      <HintPath>..\packages\ArmoLib.1.0.19\lib\ArmoLib.dll</HintPath>
+    <Reference Include="ArmoLib, Version=1.0.19.0, Culture=neutral, PublicKeyToken=575537b638b63de1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WiegandConverter.1.0.7\lib\ArmoLib.dll</HintPath>
     </Reference>
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="WiegandConverter">
+      <HintPath>..\packages\WiegandConverter.1.0.7\lib\WiegandConverter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Options.cs" />
-    <Compile Include="Common\Static.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

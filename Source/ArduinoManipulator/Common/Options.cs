@@ -18,7 +18,7 @@ namespace ArduinoManipulator.Common
         public bool CheckSum { set; get; }
 
         [Option( 's', "size" )]
-        public int WiegandBitSize { set; get; }
+        public byte WiegandBitSize { set; get; }
 
         [Option( 'n', "number" )]
         public ulong CardNumber { set; get; }

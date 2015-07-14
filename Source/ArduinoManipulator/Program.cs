@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using ArduinoManipulator.Common;
-using MoreLinq;
+using WiegandConverter;
 
 namespace ArduinoManipulator
 {
     internal static class Program
     {
-        private const int ArduinoPort = 9600;
-        private const int CheckSumLength = 2;
-
         private static int Main()
         {
             var options = new Options();
@@ -19,37 +13,17 @@ namespace ArduinoManipulator
                 return -1;
             if ( options.ReaderNumber == 0 )
                 return -2;
-            if ( options.WiegandBitSize == 0 || sizeof ( ulong ) * 8 + CheckSumLength < options.WiegandBitSize )
-                return -3;
-            if ( string.IsNullOrEmpty( options.IP ) )
-                return -4;
 
-            var bitString = options.CardNumber.ToBinaryString( options.CheckSum ? options.WiegandBitSize - CheckSumLength : options.WiegandBitSize );
-            if ( options.CheckSum )
-            {
-                var middlePoint = bitString.Length / 2;
-                bitString = string.Format( "{0}{1}{2}", bitString.Take( middlePoint ).SumAsInt() % 2, bitString, bitString.TakeLast( middlePoint ).SumAsInt() % 2 == 1 ? 0 : 1 );
-            }
-
-            var client = new TcpClient();
             try
             {
-                client.Connect( options.IP, ArduinoPort );
-                using ( var stream = client.GetStream() )
-                {
-                    var parameters = new[] { options.ReaderNumber.ToString(), bitString }.SelectMany( item => Encoding.Convert( Encoding.Unicode, Encoding.ASCII, Encoding.Unicode.GetBytes( item ) ) ).ToArray();
-                    stream.Write( parameters, 0, parameters.Length );
-                }
+                ArduinoClient.Send( options.ReaderNumber, Converter.ConvertToWiegandString( options.CardNumber, options.WiegandBitSize, options.CheckSum ), options.IP );
             }
             catch ( Exception exception )
             {
                 Console.WriteLine( "Exception: {0}", exception );
-                return -5;
+                return -3;
             }
-            finally
-            {
-                client.Close();
-            }
+
             return 0;
         }
     }

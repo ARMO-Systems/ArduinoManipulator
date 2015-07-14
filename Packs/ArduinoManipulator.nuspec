@@ -9,9 +9,9 @@
     </metadata>
     <files>
         <file src="..\Source\_output\Release\ArduinoManipulator.exe" target="tools\ArduinoManipulator.exe" />
-        <file src="..\Source\_output\Release\ArduinoManipulator.exe.config" target="tools\ArduinoManipulator.exe.config" />
         <file src="..\Source\_output\Release\ArmoLib.dll" target="tools\ArmoLib.dll" />
         <file src="..\Source\_output\Release\CommandLine.dll" target="tools\CommandLine.dll" />
         <file src="..\Source\_output\Release\CommandLine.xml" target="tools\CommandLine.xml" />
+        <file src="..\Source\_output\Release\WiegandConverter.dll" target="tools\WiegandConverter.dll" />
     </files>
 </package>
