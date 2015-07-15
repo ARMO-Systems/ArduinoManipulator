@@ -100,11 +100,11 @@ void loop() {
 
     switch (readerNumber)
     {
-      case 1:  writeCard(binaryString, 3, 5); break;
-      case 2:  writeCard(binaryString, 6, 9); break;
-      case 3:  writeCard(binaryString, A0, A1); break;
-      case 4:  writeCard(binaryString, A2, A3); break;
-      case 5:  writeCard(binaryString, A4, A5); break;
+      case 0:  writeCard(binaryString, 3, 5); break;
+      case 1:  writeCard(binaryString, 6, 9); break;
+      case 2:  writeCard(binaryString, A0, A1); break;
+      case 3:  writeCard(binaryString, A2, A3); break;
+      case 4:  writeCard(binaryString, A4, A5); break;
     }
     delay(200);
   }
