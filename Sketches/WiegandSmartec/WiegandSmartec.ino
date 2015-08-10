@@ -19,6 +19,9 @@ const int serverPort = 9600;
 const int ledPin = 13;
 EthernetServer server = EthernetServer(serverPort);
 
+#define RELAY_1 A5
+#define RELAY_2 A4
+#define RELAY_POWER_NC 8
 
 void setup() {
 
@@ -39,8 +42,9 @@ void setup() {
   SetupPin(A2);
   SetupPin(A3);
 
-  SetupPin(A4);
-  SetupPin(A5);
+  SetupPin(RELAY_1);
+  SetupPin(RELAY_2);
+  SetupPin(RELAY_POWER_NC);
   
   Ethernet.begin(mac, ip, gateway, subnet);
   server.begin();
@@ -79,6 +83,21 @@ void writeCard(String sendValue, int WDO, int WD1) {
   Serial.println();
 }
 
+void turnInput( int action, int inputNum )
+{
+  if( action == 0 )
+  {
+    Serial.println( "Close input" );  
+    digitalWrite(inputNum,LOW);
+  }
+  if( action == 1 )
+  {
+    Serial.println( "Open input" ); 
+    digitalWrite(inputNum,HIGH);
+  }
+  delay(100);  
+}
+ 
 void loop() {
 
   EthernetClient client = server.available();
@@ -104,7 +123,9 @@ void loop() {
       case 1:  writeCard(binaryString, 6, 9); break;
       case 2:  writeCard(binaryString, A0, A1); break;
       case 3:  writeCard(binaryString, A2, A3); break;
-      case 4:  writeCard(binaryString, A4, A5); break;
+      case 4:  turnInput(binaryString.toInt(), RELAY_1); break;
+      case 5:  turnInput(binaryString.toInt(), RELAY_2); break;
+      case 6:  turnInput(binaryString.toInt(), RELAY_POWER_NC); break;
     }
     delay(200);
   }
