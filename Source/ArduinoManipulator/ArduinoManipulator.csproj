@@ -35,18 +35,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ArmoLib, Version=1.0.19.0, Culture=neutral, PublicKeyToken=575537b638b63de1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WiegandConverter.1.0.8\lib\ArmoLib.dll</HintPath>
+      <HintPath>..\packages\DataCommunicator.1.0.11\lib\ArmoLib.dll</HintPath>
     </Reference>
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="DataCommunicator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=438ef093920170cc, processorArchitecture=MSIL">
+      <HintPath>..\packages\DataCommunicator.1.0.11\lib\DataCommunicator.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="WiegandConverter, Version=1.0.0.0, Culture=neutral, PublicKeyToken=438ef093920170cc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WiegandConverter.1.0.8\lib\WiegandConverter.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Options.cs" />

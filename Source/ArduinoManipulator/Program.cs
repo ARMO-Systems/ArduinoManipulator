@@ -1,6 +1,8 @@
 ﻿using System;
 using ArduinoManipulator.Common;
-using WiegandConverter;
+using ArmoSystems.DataCommunicator;
+using ArmoSystems.DataCommunicator.DataProviders;
+using ArmoSystems.DataCommunicator.Senders;
 
 namespace ArduinoManipulator
 {
@@ -16,7 +18,9 @@ namespace ArduinoManipulator
 
             try
             {
-                ArduinoClient.Send( options.ReaderNumber, Converter.ConvertToWiegandString( options.CardNumber, options.WiegandBitSize, options.CheckSum ), options.IP );
+                var arduinoDataProvider = new ArduinoDataProvider();
+                arduinoDataProvider.SetData( options.ReaderNumber, Converter.ConvertToWiegandString( options.CardNumber, options.WiegandBitSize, options.CheckSum ) );
+                new Communicator( new TcpSender( options.IP, 9600 ), arduinoDataProvider ).Send();
             }
             catch ( Exception exception )
             {
